@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Món quà bất ngờ!</title>
+    <style>
+        body {
+            background-color: #ffe4e1;
+            margin: 0;
+            overflow: hidden; /* Ẩn thanh cuộn để tạo hiệu ứng bay vô hạn */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        #gift-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 10;
+        }
+
+        #instruction {
+            font-size: 22px;
+            color: #d02090;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 2px #fff;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        #gift-box {
+            font-size: 120px;
+            cursor: pointer;
+            user-select: none; /* Tránh bôi đen khi nhấn giữ */
+            -webkit-user-select: none;
+            display: inline-block;
+        }
+
+        /* Animation cho các phần tử bay lên */
+        @keyframes floatUp {
+            0% {
+                top: 100vh;
+                opacity: 1;
+                transform: translateX(0) rotate(0deg);
+            }
+            100% {
+                top: -20vh;
+                opacity: 0;
+                transform: translateX(50px) rotate(20deg);
+            }
+        }
+
+        .floating-text {
+            position: absolute;
+            font-size: 24px;
+            font-weight: bold;
+            white-space: nowrap;
+            z-index: 5;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8);
+        }
+
+        .floating-img {
+            position: absolute;
+            width: 120px;
+            height: auto;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 4;
+            border: 3px solid #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="gift-container">
+        <div id="instruction">Nhấn và giữ hộp quà một lúc nhé! 💖</div>
+        <div id="gift-box">🎁</div>
+    </div>
+
+    <div id="floating-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
+    <script>
+        const giftBox = document.getElementById('gift-box');
+        const giftContainer = document.getElementById('gift-container');
+        const floatingContainer = document.getElementById('floating-container');
+
+        let holdTimer;
+        let shakeIntensity = 0;
+        let holdDuration = 0;
+        let isExploded = false;
+
+        // ==========================================
+        // BẠN THAY ĐỔI LỜI CHÚC VÀ ẢNH Ở ĐÂY NHÉ
+        // ==========================================
+        const wishes = [
+            "Chúc em tuổi mới luôn xinh đẹp rạng rỡ!",
+            "Mỗi ngày bên em đều là một ngày vui ❤️",
+            "Yêu em nhiều hơn ngày hôm qua!",
+            "Chúc cô gái của anh luôn hạnh phúc!",
+            "Hay ăn chóng lớn nhé!",
+            "Thương em nhất trên đời! 🥰"
+        ];
+
+        // Điền link ảnh của 2 bạn vào đây (có thể dùng link ảnh trên Facebook/Google Drive/Imgur)
+        const images = [
+            "https://files.catbox.moe/o9v1h8.jpg", // Thay bằng link ảnh thật
+            "https://files.catbox.moe/o9v1h8.jpg", 
+            "https://files.catbox.moe/o9v1h8.jpg"
+        ];
+        // ==========================================
+
+        const colors = ['#ff69b4', '#d02090', '#ff1493', '#c71585', '#ff4500', '#ff0000'];
+
+        // Hàm bắt đầu nhấn giữ
+        function startHold(e) {
+            if (isExploded) return;
+            // Ngăn trình duyệt hiển thị menu chuột phải hoặc bôi đen
+            if(e.cancelable) e.preventDefault(); 
+            
+            holdDuration = 0;
+            shakeIntensity = 0;
+
+            holdTimer = setInterval(() => {
+                holdDuration += 100; // Tăng mỗi 0.1 giây
+                shakeIntensity += 1; // Rung mạnh dần lên
+
+                // Tạo hiệu ứng rung lắc ngẫu nhiên dựa trên cường độ
+                let x = (Math.random() - 0.5) * shakeIntensity;
+                let y = (Math.random() - 0.5) * shakeIntensity;
+                giftBox.style.transform = `translate(${x}px, ${y}px)`;
+
+                // Nhấn giữ đủ 2.5 giây thì nổ
+                if (holdDuration >= 2500) {
+                    explode();
+                }
+            }, 100);
+        }
+
+        // Hàm thả tay ra
+        function endHold() {
+            if (isExploded) return;
+            clearInterval(holdTimer);
+            giftBox.style.transform = `translate(0px, 0px)`; // Trở lại bình thường
+            shakeIntensity = 0;
+        }
+
+        // Lắng nghe sự kiện trên máy tính (Chuột)
+        giftBox.addEventListener('mousedown', startHold);
+        window.addEventListener('mouseup', endHold);
+        window.addEventListener('mouseleave', endHold);
+
+        // Lắng nghe sự kiện trên điện thoại (Cảm ứng)
+        giftBox.addEventListener('touchstart', startHold, {passive: false});
+        window.addEventListener('touchend', endHold);
+        window.addEventListener('touchcancel', endHold);
+
+        // Hiệu ứng hộp quà nổ
+        function explode() {
+            isExploded = true;
+            clearInterval(holdTimer);
+
+            // Bắn pháo hoa
+            confetti({
+                particleCount: 200,
+                spread: 120,
+                origin: { y: 0.6 },
+                zIndex: 100
+            });
+
+            // Ẩn hộp quà đi
+            giftContainer.style.display = 'none';
+
+            // Bắt đầu vòng lặp tạo lời chúc và ảnh bay lên liên tục
+            // Cứ 0.6 giây sẽ sinh ra 1 cái mới
+            setInterval(createFloatingItem, 600); 
+        }
+
+        // Hàm tạo phần tử bay lên
+        function createFloatingItem() {
+            // Tỷ lệ: 70% xuất hiện chữ, 30% xuất hiện ảnh
+            const isImage = Math.random() < 0.3; 
+            let el;
+
+            if (isImage && images.length > 0) {
+                el = document.createElement('img');
+                el.src = images[Math.floor(Math.random() * images.length)];
+                el.className = 'floating-img';
+            } else {
+                el = document.createElement('div');
+                el.innerText = wishes[Math.floor(Math.random() * wishes.length)];
+                el.className = 'floating-text';
+                // Đổi màu chữ ngẫu nhiên
+                el.style.color = colors[Math.floor(Math.random() * colors.length)];
+            }
+
+            // Vị trí xuất hiện ngẫu nhiên theo chiều ngang (từ 5% đến 85% màn hình)
+            el.style.left = Math.random() * 80 + 5 + 'vw';
+
+            // Tốc độ bay ngẫu nhiên từ 5 đến 8 giây
+            const duration = 5 + Math.random() * 3;
+            el.style.animation = `floatUp ${duration}s linear forwards`;
+
+            floatingContainer.appendChild(el);
+
+            // Xóa phần tử khỏi trang sau khi bay xong để không bị nặng máy (chạy vô hạn mượt mà)
+            setTimeout(() => {
+                el.remove();
+            }, duration * 1000);
+        }
+    </script>
+</body>
+</html>
