@@ -3,291 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Món quà bất ngờ!</title>
+    <title>Chúc vợ Trang Ngủ Ngon ❤️</title>
     <style>
+        /* Thiết lập bầu trời đêm bằng gradient màu */
         body {
             margin: 0;
-            overflow: hidden;
-            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 0;
+            height: 100vh;
+            background: linear-gradient(to bottom, #020111 10%, #20124d 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden; /* Ẩn thanh cuộn */
+            position: relative;
         }
 
-        /* Canvas nền trái tim */
-        #heart-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            pointer-events: none;
-        }
-
-        #gift-container {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+        /* Hiệu ứng chữ phát sáng và nhịp đập */
+        h1 {
+            font-size: 3rem;
+            text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #ff66b2;
+            animation: pulse 2s infinite;
+            z-index: 10;
             text-align: center;
+            margin: 10px 0;
+        }
+
+        p {
+            z-index: 10;
+            font-size: 1.2rem;
+            color: #d1d1d1;
+            font-style: italic;
+        }
+
+        /* Hiệu ứng mặt trăng trôi bồng bềnh */
+        .moon {
+            font-size: 5rem;
+            margin-bottom: 10px;
+            animation: float 3s ease-in-out infinite;
             z-index: 10;
         }
 
-        #instruction {
-            font-size: 24px;
-            color: #d02090;
-            font-weight: bold;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8);
-            animation: pulse 1.5s infinite;
-        }
-
+        /* Khung hình (Keyframes) cho các hoạt ảnh */
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
             100% { transform: scale(1); }
         }
 
-        #gift-box {
-            font-size: 130px;
-            cursor: pointer;
-            user-select: none;
-            -webkit-user-select: none;
-            display: inline-block;
-            filter: drop-shadow(0px 10px 15px rgba(0,0,0,0.2));
+        @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0); }
         }
 
-        /* Hiệu ứng bay lên của ảnh và chữ */
-        @keyframes floatUp {
-            0% { top: 100vh; opacity: 0; transform: translateX(0) scale(0.8) rotate(0deg); }
-            10% { opacity: 1; transform: scale(1.1); }
-            90% { opacity: 1; }
-            100% { top: -20vh; opacity: 0; transform: translateX(50px) scale(1) rotate(20deg); }
-        }
-
-        .floating-text {
+        /* CSS cho các ngôi sao */
+        .star {
             position: absolute;
-            font-size: 28px;
-            font-weight: bold;
-            white-space: nowrap;
-            z-index: 5;
-            text-shadow: 2px 2px 5px rgba(255, 255, 255, 0.9);
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 20px;
-            backdrop-filter: blur(5px);
+            background: white;
+            border-radius: 50%;
+            animation: twinkle infinite alternate;
         }
 
-        .floating-img {
-            position: absolute;
-            width: 150px;
-            height: auto;
-            border-radius: 15px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-            z-index: 4;
-            border: 4px solid #fff;
-            object-fit: cover;
+        @keyframes twinkle {
+            0% { opacity: 0.1; }
+            100% { opacity: 1; text-shadow: 0 0 5px #fff; }
         }
     </style>
 </head>
 <body>
 
-    <canvas id="heart-canvas"></canvas>
+    <!-- Nội dung chính -->
+    <div class="moon">🌙</div>
+    <h1>Chúc Ngọc ngủ ngon! ❤️</h1>
+    <p>Mơ thật đẹp nhé!</p>
 
-    <div id="gift-container">
-        <div id="instruction">Nhấn và giữ hộp quà nhé! 💖</div>
-        <div id="gift-box">🎁</div>
-    </div>
-
-    <div id="floating-container"></div>
-
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
-
+    <!-- Script tạo sao lấp lánh ngẫu nhiên -->
     <script>
-        // =========================================================================
-        // KHU VỰC TÙY CHỈNH
-        // =========================================================================
-        const TUI_CHINH = {
-            // 1. Lời chúc (Đã thay bằng 17 câu cực ngọt cho bé Ngọc)
-            loi_chuc: [
-                "Chúc bé Ngọc đáng yêu buổi tối vui vẻ!!! 🥰",
-                "Yêu bé Ngọc nhất trên đời ❤️",
-                "Ngọc là ngoại lệ duy nhất của anh đó!",
-                "Bầu trời nay có nhiều sao, nhưng sao đẹp nhất vẫn là bé Ngọc.",
-                "Mọi dòng code anh viết đều có thể có bug, nhưng tình yêu anh dành cho Ngọc thì luôn hoàn hảo. 💻❤️",
-                "Nụ cười của Ngọc làm tim anh lỡ nhịp mất rồi!",
-                "Người ta gọi em là Ngọc, còn anh gọi em là 'Tất cả của anh'.",
-                "Nếu có một điều ước, anh chỉ ước ngày nào cũng được nhìn thấy Ngọc cười.",
-                "Trái đất quay quanh mặt trời, còn anh thì quay quanh bé Ngọc.",
-                "Ngọc có biết không, em chính là mảnh ghép còn thiếu trong cuộc đời anh.",
-                "Với thế giới Ngọc chỉ là một người, nhưng với anh Ngọc là cả thế giới. 🌍",
-                "Nhìn Ngọc một giây thôi, mà anh cứ ngỡ say cả một đời.",
-                "Công chúa Ngọc của anh là số 1! 👑",
-                "Anh không giỏi văn, anh chỉ giỏi mỗi việc yêu bé Ngọc thôi.",
-                "Trà sữa phải có trân châu, còn đời anh phải có Ngọc mới trọn vẹn. 🧋",
-                "Mỗi lần Ngọc cười là anh thấy như mùa xuân về.",
-                "Ngọc là viên ngọc quý giá nhất mà anh may mắn có được."
-            ],
-
-            // 2. Link ảnh của hai bạn (Nhớ đổi lại bằng link ảnh thật nhé!)
-            anh_ky_niem: [
-                "https://files.catbox.moe/o9v1h8.jpg", 
-                "https://files.catbox.moe/o9v1h8.jpg"
-            ],
-
-            // 3. Màu sắc của chữ bay lên
-            mau_chu: ['#ff1493', '#c71585', '#ff4500', '#ff0000', '#8b008b'],
-
-            // 4. Thời gian cần nhấn giữ hộp quà để nổ (2500 = 2.5s)
-            thoi_gian_giu: 2500,
-
-            // 5. Tỉ lệ xuất hiện ảnh so với chữ (0.4 nghĩa là 40% ra ảnh, 60% ra chữ)
-            ti_le_anh: 0.4
-        };
-        // =========================================================================
-
-
-        // --- LOGIC HOẠT ĐỘNG ---
-
-        // 1. Logic nền trái tim bay giống Messenger
-        const canvas = document.getElementById('heart-canvas');
-        const ctx = canvas.getContext('2d');
-        let hearts = [];
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        class Heart {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = canvas.height + Math.random() * 100;
-                this.size = Math.random() * 15 + 10;
-                this.speed = Math.random() * 2 + 1;
-                this.opacity = Math.random() * 0.5 + 0.3;
-                this.drift = (Math.random() - 0.5) * 1;
-            }
-            draw() {
-                ctx.globalAlpha = this.opacity;
-                ctx.fillStyle = '#ff69b4';
-                ctx.beginPath();
-                let topCurveHeight = this.size * 0.3;
-                ctx.moveTo(this.x, this.y + topCurveHeight);
-                ctx.bezierCurveTo(this.x, this.y, this.x - this.size / 2, this.y, this.x - this.size / 2, this.y + topCurveHeight);
-                ctx.bezierCurveTo(this.x - this.size / 2, this.y + (this.size + topCurveHeight) / 2, this.x, this.y + (this.size + topCurveHeight) / 2, this.x, this.y + this.size);
-                ctx.bezierCurveTo(this.x, this.y + (this.size + topCurveHeight) / 2, this.x + this.size / 2, this.y + (this.size + topCurveHeight) / 2, this.x + this.size / 2, this.y + topCurveHeight);
-                ctx.bezierCurveTo(this.x + this.size / 2, this.y, this.x, this.y, this.x, this.y + topCurveHeight);
-                ctx.closePath();
-                ctx.fill();
-            }
-            update() {
-                this.y -= this.speed;
-                this.x += this.drift;
-                if (this.y < -50) {
-                    this.y = canvas.height + 50;
-                    this.x = Math.random() * canvas.width;
-                }
-            }
-        }
-
-        for (let i = 0; i < 40; i++) hearts.push(new Heart());
-
-        function animateHearts() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            hearts.forEach(heart => {
-                heart.update();
-                heart.draw();
-            });
-            requestAnimationFrame(animateHearts);
-        }
-        animateHearts();
-
-        // 2. Logic Hộp quà & Pháo hoa
-        const giftBox = document.getElementById('gift-box');
-        const giftContainer = document.getElementById('gift-container');
-        const floatingContainer = document.getElementById('floating-container');
-        let holdTimer, shakeIntensity = 0, holdDuration = 0, isExploded = false;
-
-        function startHold(e) {
-            if (isExploded) return;
-            if(e.cancelable) e.preventDefault(); 
-            holdDuration = 0; shakeIntensity = 0;
-
-            holdTimer = setInterval(() => {
-                holdDuration += 100; 
-                shakeIntensity += 1.5; 
-                let x = (Math.random() - 0.5) * shakeIntensity;
-                let y = (Math.random() - 0.5) * shakeIntensity;
-                giftBox.style.transform = `translate(${x}px, ${y}px) scale(1.1)`; 
-
-                if (holdDuration >= TUI_CHINH.thoi_gian_giu) explode();
-            }, 50);
-        }
-
-        function endHold() {
-            if (isExploded) return;
-            clearInterval(holdTimer);
-            giftBox.style.transform = `translate(0px, 0px) scale(1)`;
-            shakeIntensity = 0;
-        }
-
-        giftBox.addEventListener('mousedown', startHold);
-        window.addEventListener('mouseup', endHold);
-        window.addEventListener('mouseleave', endHold);
-        giftBox.addEventListener('touchstart', startHold, {passive: false});
-        window.addEventListener('touchend', endHold);
-        window.addEventListener('touchcancel', endHold);
-
-        // Hiệu ứng pháo hoa siêu thực
-        function realisticFireworks() {
-            const duration = 3000;
-            const animationEnd = Date.now() + duration;
-            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 100 };
-
-            function randomInRange(min, max) { return Math.random() * (max - min) + min; }
-
-            const interval = setInterval(function() {
-                const timeLeft = animationEnd - Date.now();
-                if (timeLeft <= 0) return clearInterval(interval);
-                const particleCount = 50 * (timeLeft / duration);
+        function createStars() {
+            const count = 150; // Số lượng ngôi sao
+            const body = document.querySelector('body');
+            
+            for (let i = 0; i < count; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
                 
-                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
-                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
-            }, 250);
-        }
+                // Tạo vị trí ngẫu nhiên trên màn hình
+                const x = Math.floor(Math.random() * window.innerWidth);
+                const y = Math.floor(Math.random() * window.innerHeight);
+                
+                // Tạo kích thước ngẫu nhiên cho sao
+                const size = Math.random() * 3;
+                
+                // Thời gian nhấp nháy ngẫu nhiên
+                const duration = Math.random() * 2 + 1;
 
-        function explode() {
-            isExploded = true;
-            clearInterval(holdTimer);
-            realisticFireworks(); 
-            giftContainer.style.display = 'none'; 
-            setInterval(createFloatingItem, 700); 
-        }
+                // Áp dụng CSS
+                star.style.left = x + 'px';
+                star.style.top = y + 'px';
+                star.style.width = size + 'px';
+                star.style.height = size + 'px';
+                star.style.animationDuration = duration + 's';
 
-        function createFloatingItem() {
-            const isImage = Math.random() < TUI_CHINH.ti_le_anh; 
-            let el;
-
-            if (isImage && TUI_CHINH.anh_ky_niem.length > 0) {
-                el = document.createElement('img');
-                el.src = TUI_CHINH.anh_ky_niem[Math.floor(Math.random() * TUI_CHINH.anh_ky_niem.length)];
-                el.className = 'floating-img';
-            } else {
-                el = document.createElement('div');
-                el.innerText = TUI_CHINH.loi_chuc[Math.floor(Math.random() * TUI_CHINH.loi_chuc.length)];
-                el.className = 'floating-text';
-                el.style.color = TUI_CHINH.mau_chu[Math.floor(Math.random() * TUI_CHINH.mau_chu.length)];
+                body.appendChild(star);
             }
-
-            el.style.left = Math.random() * 70 + 10 + 'vw';
-            const duration = 6 + Math.random() * 4; 
-            el.style.animation = `floatUp ${duration}s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
-
-            floatingContainer.appendChild(el);
-            setTimeout(() => el.remove(), duration * 1000);
         }
+        
+        // Gọi hàm để vẽ sao khi tải trang
+        createStars();
     </script>
 </body>
 </html>
